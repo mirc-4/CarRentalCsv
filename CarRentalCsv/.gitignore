@@ -1,0 +1,17 @@
+# Build- und Publish-Ordner
+bin/
+obj/
+wwwroot/exports/
+
+# Benutzer- oder IDE-spezifisch
+.vscode/
+.idea/
+*.user
+*.suo
+
+# OS-spezifisch
+.DS_Store
+Thumbs.db
+
+# Paketmanager-Caches
+*.log

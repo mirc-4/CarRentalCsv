@@ -1,0 +1,100 @@
+@page "/export"
+@rendermode InteractiveServer
+@using CarRentalCsv.Models
+@using CarRentalCsv.Services
+@inject CarRentalCsv.Services.CsvWriter CsvWriter
+
+
+
+<h3>Autovermietung – CSV-Export (Basis)</h3>
+
+<p>Beispieldaten werden im Speicher erzeugt und können je Entität als CSV exportiert werden.</p>
+
+<div class="mb-3">
+    <button class="btn btn-primary me-2" @onclick="ExportBenutzer">Benutzer.csv exportieren</button>
+    @if (!string.IsNullOrWhiteSpace(BenutzerUrl))
+    {
+        <a href="@BenutzerUrl" target="_blank">Download</a>
+    }
+</div>
+
+<div class="mb-3">
+    <button class="btn btn-primary me-2" @onclick="ExportAutos">Autos.csv exportieren</button>
+    @if (!string.IsNullOrWhiteSpace(AutoUrl))
+    {
+        <a href="@AutoUrl" target="_blank">Download</a>
+    }
+</div>
+
+<div class="mb-3">
+    <button class="btn btn-primary me-2" @onclick="ExportMietvertraege">Mietvertraege.csv exportieren</button>
+    @if (!string.IsNullOrWhiteSpace(MietvertragUrl))
+    {
+        <a href="@MietvertragUrl" target="_blank">Download</a>
+    }
+</div>
+
+<hr />
+
+<h5>Vorschau: Mietverträge</h5>
+<table class="table table-sm">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Benutzer</th>
+            <th>Auto</th>
+            <th>Start</th>
+            <th>Ende</th>
+            <th>Preis pro Tag (€)</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var m in Mietvertraege)
+        {
+            <tr>
+                <td>@m.Id</td>
+                <td>@m.Benutzer.Name</td>
+                <td>@m.Auto.Marke @m.Auto.Modell</td>
+                <td>@m.StartDatum.ToString("yyyy-MM-dd")</td>
+                <td>@m.EndDatum.ToString("yyyy-MM-dd")</td>
+                <td>@m.PreisProTag</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    private List<Benutzer> Benutzer = new();
+    private List<Auto> Autos = new();
+    private List<Mietvertrag> Mietvertraege = new();
+
+    private string? BenutzerUrl;
+    private string? AutoUrl;
+    private string? MietvertragUrl;
+
+    protected override void OnInitialized()
+    {
+        Benutzer = new()
+        {
+            new() { Id = 1, Name = "Max Mustermann", Adresse = "Musterweg 1, 12345 Berlin" },
+            new() { Id = 2, Name = "Erika Mustermann", Adresse = "Hauptstr. 5, 54321 Köln" },
+        };
+
+        Autos = new()
+        {
+            new() { Id = 1, Marke = "VW", Modell = "Golf", Baujahr = 2020, Kilometerstand = 45500 },
+            new() { Id = 2, Marke = "BMW", Modell = "320i", Baujahr = 2019, Kilometerstand = 60500 },
+            new() { Id = 3, Marke = "BYD", Modell = "Seal", Baujahr = 2022, Kilometerstand = 22000 },
+        };
+
+        Mietvertraege = new()
+        {
+            new() { Id = 1, Benutzer = Benutzer[0], Auto = Autos[0], StartDatum = new DateTime(2025, 1, 10), EndDatum = new DateTime(2025, 1, 14), PreisProTag = 49.90m },
+            new() { Id = 2, Benutzer = Benutzer[1], Auto = Autos[2], StartDatum = new DateTime(2025, 2, 1), EndDatum = new DateTime(2025, 2, 3), PreisProTag = 79.00m },
+        };
+    }
+
+    private void ExportBenutzer() => BenutzerUrl      = CsvWriter.Write(Benutzer, "Benutzer.csv");
+    private void ExportAutos()     => AutoUrl          = CsvWriter.Write(Autos, "Autos.csv");
+    private void ExportMietvertraege() => MietvertragUrl = CsvWriter.Write(Mietvertraege, "Mietvertraege.csv");
+}
